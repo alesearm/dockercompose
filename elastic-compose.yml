@@ -131,8 +131,8 @@ services:
     user: "1000"
 
     volumes:
-      - "/home/armin/filebeat/apache.log:/usr/share/filebeat/logs/apache.log"
-      - "/home/armin/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml"
+      - "./filebeat/apache.log:usr/share/filebeat/logs/apache.log"
+      - "./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml"
     depends_on:
       - elasticsearch
       - kibana
