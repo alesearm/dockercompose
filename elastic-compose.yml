@@ -1,0 +1,204 @@
+networks:
+  elastic:
+     #external: true
+    name: "elastic"
+
+services:
+
+  elasticsearch:
+
+    command:
+      - "eswrapper"
+
+    container_name: "elasticsearch"
+
+    entrypoint:
+      - "/bin/tini"
+      - "--"
+      - "/usr/local/bin/docker-entrypoint.sh"
+
+    environment:
+      - "discovery.type=single-node"
+      - "xpack.security.enabled=false"
+      - "PATH=/usr/share/elasticsearch/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      - "ELASTIC_CONTAINER=true"
+
+    hostname: "28e16533452c"
+
+    image: "elasticsearch:8.13.4"
+
+    ipc: "private"
+
+    labels:
+      desktop.docker.io/wsl-distro: "Ubuntu"
+      org.label-schema.build-date: "2024-05-06T22:04:45.107454559Z"
+      org.label-schema.license: "Elastic-License-2.0"
+      org.label-schema.name: "Elasticsearch"
+      org.label-schema.schema-version: "1.0"
+      org.label-schema.url: "https://www.elastic.co/products/elasticsearch"
+      org.label-schema.usage: "https://www.elastic.co/guide/en/elasticsearch/reference/index.html"
+      org.label-schema.vcs-ref: "da95df118650b55a500dcc181889ac35c6d8da7c"
+      org.label-schema.vcs-url: "https://github.com/elastic/elasticsearch"
+      org.label-schema.vendor: "Elastic"
+      org.label-schema.version: "8.13.4"
+      org.opencontainers.image.created: "2024-05-06T22:04:45.107454559Z"
+      org.opencontainers.image.documentation: "https://www.elastic.co/guide/en/elasticsearch/reference/index.html"
+      org.opencontainers.image.licenses: "Elastic-License-2.0"
+      org.opencontainers.image.ref.name: "ubuntu"
+      org.opencontainers.image.revision: "da95df118650b55a500dcc181889ac35c6d8da7c"
+      org.opencontainers.image.source: "https://github.com/elastic/elasticsearch"
+      org.opencontainers.image.title: "Elasticsearch"
+      org.opencontainers.image.url: "https://www.elastic.co/products/elasticsearch"
+      org.opencontainers.image.vendor: "Elastic"
+      org.opencontainers.image.version: "8.13.4"
+
+    logging:
+      driver: "json-file"
+      options: {}
+
+    networks:
+      - "elastic"
+
+    ports:
+      - "9200:9200/tcp"
+      - "9300:9300/tcp"
+
+    user: "1000:0"
+
+    working_dir: "/usr/share/elasticsearch"
+
+  filebeat:
+
+    command:
+      - "-environment"
+      - "container"
+
+    container_name: "filebeat"
+
+    entrypoint:
+      - "/usr/bin/tini"
+      - "--"
+      - "/usr/local/bin/docker-entrypoint"
+
+    environment:
+      - "PATH=/usr/share/filebeat:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      - "ELASTIC_CONTAINER=true"
+      - "GODEBUG=madvdontneed=1"
+      - "LIBBEAT_MONITORING_CGROUPS_HIERARCHY_OVERRIDE=/"
+
+    hostname: "b050199715f3"
+
+    image: "docker.elastic.co/beats/filebeat:8.13.4"
+
+    ipc: "private"
+
+    labels:
+      description: "Filebeat sends log files to Logstash or directly to Elasticsearch."
+      desktop.docker.io/wsl-distro: "Ubuntu"
+      io.k8s.description: "Filebeat sends log files to Logstash or directly to Elasticsearch."
+      io.k8s.display-name: "Filebeat image"
+      license: "Elastic License"
+      maintainer: "infra@elastic.co"
+      name: "filebeat"
+      org.label-schema.build-date: "2024-05-06T06:33:51Z"
+      org.label-schema.license: "Elastic License"
+      org.label-schema.name: "filebeat"
+      org.label-schema.schema-version: "1.0"
+      org.label-schema.url: "https://www.elastic.co/beats/filebeat"
+      org.label-schema.vcs-ref: "b24ddd14c936c216817afed0cc7d0b23fd920194"
+      org.label-schema.vcs-url: "github.com/elastic/beats/v7"
+      org.label-schema.vendor: "Elastic"
+      org.label-schema.version: "8.13.4"
+      org.opencontainers.image.created: "2024-05-06T06:33:51Z"
+      org.opencontainers.image.licenses: "Elastic License"
+      org.opencontainers.image.ref.name: "ubuntu"
+      org.opencontainers.image.title: "Filebeat"
+      org.opencontainers.image.vendor: "Elastic"
+      org.opencontainers.image.version: "20.04"
+      release: "1"
+      summary: "filebeat"
+      url: "https://www.elastic.co/beats/filebeat"
+      vendor: "Elastic"
+      version: "8.13.4"
+
+    logging:
+      driver: "json-file"
+      options: {}
+
+    networks:
+      - "elastic"
+
+    user: "1000"
+
+    volumes:
+      - "/home/armin/filebeat/apache.log:/usr/share/filebeat/logs/apache.log"
+      - "/home/armin/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml"
+    depends_on:
+      - elasticsearch
+      - kibana
+
+    working_dir: "/usr/share/filebeat"
+
+  kibana:
+
+    command:
+      - "/usr/local/bin/kibana-docker"
+
+    container_name: "kibana"
+
+    entrypoint:
+      - "/bin/tini"
+      - "--"
+
+    environment:
+      - "ELASTICSEARCH_HOSTS=http://elasticsearch:9200"
+      - "PATH=/usr/share/kibana/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      - "ELASTIC_CONTAINER=true"
+
+    hostname: "7c8bf71f7941"
+
+    image: "kibana:8.13.4"
+
+    ipc: "private"
+
+    labels:
+      desktop.docker.io/wsl-distro: "Ubuntu"
+      org.label-schema.build-date: "2024-05-07T06:06:37.059Z"
+      org.label-schema.license: "Elastic License"
+      org.label-schema.name: "Kibana"
+      org.label-schema.schema-version: "1.0"
+      org.label-schema.url: "https://www.elastic.co/products/kibana"
+      org.label-schema.usage: "https://www.elastic.co/guide/en/kibana/reference/index.html"
+      org.label-schema.vcs-ref: "f5dc24d1969f80e4aa3ced7cc375dd00554f8c0c"
+      org.label-schema.vcs-url: "https://github.com/elastic/kibana"
+      org.label-schema.vendor: "Elastic"
+      org.label-schema.version: "8.13.4"
+      org.opencontainers.image.created: "2024-05-07T06:06:37.059Z"
+      org.opencontainers.image.documentation: "https://www.elastic.co/guide/en/kibana/reference/index.html"
+      org.opencontainers.image.licenses: "Elastic License"
+      org.opencontainers.image.ref.name: "ubuntu"
+      org.opencontainers.image.revision: "f5dc24d1969f80e4aa3ced7cc375dd00554f8c0c"
+      org.opencontainers.image.source: "https://github.com/elastic/kibana"
+      org.opencontainers.image.title: "Kibana"
+      org.opencontainers.image.url: "https://www.elastic.co/products/kibana"
+      org.opencontainers.image.vendor: "Elastic"
+      org.opencontainers.image.version: "8.13.4"
+
+    logging:
+      driver: "json-file"
+      options: {}
+
+    networks:
+      - "elastic"
+
+    ports:
+      - "5601:5601/tcp"
+
+    user: "1000"
+
+    depends_on:
+      - elasticsearch
+
+    working_dir: "/usr/share/kibana"
+
+version: "3.6"
